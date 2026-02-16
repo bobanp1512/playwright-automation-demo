@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
-import { HomePage } from '../pages/HomePage'; // Import the new page
+import { HomePage } from '../pages/HomePage'; 
 
 test('End-to-End Navigation Test', async ({ page }) => {
   const loginPage = new LoginPage(page);
@@ -8,14 +8,13 @@ test('End-to-End Navigation Test', async ({ page }) => {
 
   // 1. Start at Login
   await loginPage.goto();
-  await loginPage.login('bobanpesevski@yahoo.com', 'Shporet@1512');
+  await loginPage.login('standard_user', 'secret_sauce');
 
   // 2. Transition to Home Page logic
-  // Note: Since we don't have a real login, we can just verify the 
-  // page tries to redirect or check for home elements
-  await expect(page).toHaveURL(/.*feed/); 
-  await expect(homePage.navHome).toBeVisible();
+  await expect(page).toHaveURL(/.*inventory.html/); // Updated for Saucedemo URL
+  await homePage.isLoaded(); 
   
-  // 3. Perform an action on the Home Page
-  await homePage.searchFor('QA Automation Engineer');
+  // 3. Action Step (Optional)
+  // Since we removed searchFor, we can just log a message or delete this section.
+  console.log("Successfully reached the inventory page!");
 });

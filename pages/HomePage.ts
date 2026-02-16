@@ -3,19 +3,19 @@ import { type Locator, type Page, expect } from '@playwright/test';
 export class HomePage {
   readonly page: Page;
   readonly navHome: Locator;
-  readonly profileIcon: Locator;
-  readonly searchInput: Locator;
+  readonly inventoryList: Locator; // Added this
+  readonly shoppingCart: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    // Locators for elements visible ONLY after login
-    this.navHome = page.locator('#global-nav');
-    this.profileIcon = page.locator('.global-nav__me-photo');
-    this.searchInput = page.locator('.search-global-typeahead__input');
+    this.navHome = page.locator('.app_logo'); 
+    this.inventoryList = page.locator('.inventory_list'); // Now matches the top
+    this.shoppingCart = page.locator('.shopping_cart_link');
   }
 
-  async searchFor(term: string) {
-    await this.searchInput.fill(term);
-    await this.page.keyboard.press('Enter');
+  // Changed searchFor to isLoaded because Saucedemo doesn't have a search bar
+  async isLoaded() {
+    await expect(this.navHome).toBeVisible();
+    await expect(this.inventoryList).toBeVisible();
   }
 }
