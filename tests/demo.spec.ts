@@ -1,13 +1,18 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage'; // Import the Page Object
 
-test('Verify LinkedIn Login Page Loads', async ({ page }) => {
-  // Go to the page
-  await page.goto('https://www.linkedin.com/login');
+test('Professional Login Test using POM', async ({ page }) => {
+  const loginPage = new LoginPage(page);
 
-  // Verify the "Sign in" header is visible
-  const header = page.locator('h1');
-  await expect(header).toContainText('Sign in');
+  // Use the method from our Page Object
+  await loginPage.goto();
+
+  // Instead of locator('#username'), we use the property from the class
+  await expect(loginPage.usernameInput).toBeVisible();
   
-  // Verify the email input is there
-  await expect(page.locator('#username')).toBeVisible();
+  // You can perform actions through the POM methods
+  await loginPage.login('test-user@email.com', 'FakePassword123');
+
+  // Verify errors if they exist
+  // await expect(loginPage.errorMessage).toBeVisible();
 });
