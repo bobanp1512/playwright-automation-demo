@@ -8,7 +8,7 @@ test('End-to-End Navigation Test', async ({ page }) => {
 
   // 1. Start at Login
   await loginPage.goto();
-  await loginPage.login('your-email@example.com', 'your-password');
+  await loginPage.login('bobanpesevski@yahoo.com', 'Shporet@1512');
 
   // 2. Transition to Home Page logic
   // Note: Since we don't have a real login, we can just verify the 
