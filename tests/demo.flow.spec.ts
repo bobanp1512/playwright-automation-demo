@@ -1,20 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
-import { HomePage } from '../pages/HomePage'; 
+import { HomePage } from '../pages/HomePage';
+import users from '../data/users.json'; // Import your JSON list
 
-test('End-to-End Navigation Test', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const homePage = new HomePage(page);
+users.forEach((user) => {
+  test(`Login Flow: ${user.description}`, async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const homePage = new HomePage(page);
 
-  // 1. Start at Login
-  await loginPage.goto();
-  await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.goto();
+    await loginPage.login(user.username, user.password);
 
-  // 2. Transition to Home Page logic
-  await expect(page).toHaveURL(/.*inventory.html/); // Updated for Saucedemo URL
-  await homePage.isLoaded(); 
-  
-  // 3. Action Step (Optional)
-  // Since we removed searchFor, we can just log a message or delete this section.
-  console.log("Successfully reached the inventory page!");
-});
+    if (user.username === 'standard_user') {
+      // Logic for successful login
+      await expect(page).toHaveURL(/.*inventory.html/);
+      await homePage.isLoaded();
+    } else {
+      // Logic for failed/locked login
+      await expect(loginPage.errorMessage).toBeVisible();
+      await expect(loginPage.errorMessage).toContainText('Sorry, this user has been locked out');
+    }
+  });
+}); 
