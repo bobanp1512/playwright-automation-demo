@@ -1,12 +1,12 @@
 [
   {
     "username": "standard_user",
-    "password": "secret_sauce",
+    "password": "SAUCE_PASSWORD_KEY",
     "description": "Success Case"
   },
   {
     "username": "locked_out_user",
-    "password": "secret_sauce",
+    "password": "SAUCE_PASSWORD_KEY",
     "description": "Locked Account Case"
   }
 ]
