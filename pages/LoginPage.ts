@@ -10,10 +10,10 @@ export class LoginPage {
   constructor(page: Page) {
     this.page = page;
     // We define locators here once. If the ID changes, we only fix it here!
-  this.usernameInput = page.locator('[data-test="username"]');
-  this.passwordInput = page.locator('[data-test="password"]');
-  this.loginButton = page.locator('[data-test="login-button"]');
-  this.errorMessage = page.locator('[data-test="error"]');
+    this.usernameInput = page.locator('[data-test="username"]');
+    this.passwordInput = page.locator('[data-test="password"]');
+    this.loginButton = page.locator('[data-test="login-button"]');
+    this.errorMessage = page.locator('[data-test="error"]');
   }
 
   async goto() {
