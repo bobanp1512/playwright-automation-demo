@@ -20,4 +20,10 @@ export class CartPage {
   async proceedToCheckout() {
     await this.checkoutButton.click();
   }
+
+
+  // Inside your CartPage class
+  async checkout() {
+    await this.page.click('[data-test="checkout"]');
+  }
 }

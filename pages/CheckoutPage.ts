@@ -27,4 +27,11 @@ export class CheckoutPage {
   async completeOrder() {
     await this.finishButton.click();
   }
+
+  get errorMessage() { return this.page.locator('[data-test="error"]'); } //added for checkout-negative.spec.ts
+
+  async getErrorText() {
+    return await this.errorMessage.textContent(); //added for checkout-negative.spec.ts
+  }
+
 }

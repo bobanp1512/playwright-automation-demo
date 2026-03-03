@@ -15,4 +15,13 @@ export class InventoryPage {
     const productContainer = this.page.locator('.inventory_item', { hasText: productName });
     await productContainer.getByRole('button', { name: 'Add to cart' }).click();
   }
+
+  async goto() {
+    await this.page.goto('https://www.saucedemo.com/inventory.html');
+  }
+
+  async goToCart() {
+    await this.page.click('.shopping_cart_link');
+  }
+
 }

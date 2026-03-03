@@ -31,8 +31,8 @@ test.describe('Shopping Cart Flow', () => {
         // 3. Checkout Information
         // await checkoutPage.fillInformation('John', 'Doe', '12345'); -old
         await checkoutPage.fillInformation(
-            testData.customerInfo.firstName,                //- new from test-data.json
-            testData.customerInfo.lastName,
+            testData.customerInfo.firstName,         
+            testData.customerInfo.lastName,     //- new from test-data.json
             testData.customerInfo.zipCode
         )
 

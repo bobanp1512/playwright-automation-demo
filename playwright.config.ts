@@ -25,12 +25,14 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
+    /* Capture screenshot only on failure */
+    screenshot: 'only-on-failure',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    /* Record video only on failure */
+    video: 'retain-on-failure',
+
+    /* Keep traces for failed tests to help with debugging */
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure', // Or change to 'on' to see it every time
   },
 
   /* Configure projects for major browsers */
@@ -43,7 +45,7 @@ export default defineConfig({
 
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // 2. Tell this browser to use the saved session
         storageState: 'playwright/.auth/user.json',
@@ -54,7 +56,7 @@ export default defineConfig({
 
     {
       name: 'firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
       },
@@ -63,12 +65,41 @@ export default defineConfig({
 
     {
       name: 'webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         storageState: 'playwright/.auth/user.json',
       },
       dependencies: ['setup'],
     },
+
+    {
+      name: 'Mobile Safari',
+      use: {
+        ...devices['iPhone 13'],
+        storageState: 'playwright/.auth/user.json', // Use the same session
+      },
+      dependencies: ['setup'], // Wait for the login to happen first
+    },
+
+    // {
+    //   name: 'Ultra-Narrow Viewport', // Rename it from Mobile Safari
+    //   use: {
+    //     viewport: { width: 300, height: 600 },
+    //     storageState: 'playwright/.auth/user.json',
+    //   },
+    //   dependencies: ['setup'],
+    // },
+
+    {
+      name: 'Mobile Chrome',
+      use: {
+        ...devices['Pixel 5'],
+        storageState: 'playwright/.auth/user.json', //android Mobile
+      },
+      dependencies: ['setup'],
+    },
+
+
   ],
 
   /* Run your local dev server before starting the tests */
