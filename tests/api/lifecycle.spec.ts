@@ -17,6 +17,9 @@ test.describe('Post API Lifecycle Management', () => {
         const newId = postData.id; // Capture the dynamic ID
         console.log(`Resource Created with ID: ${newId}`);
 
+        // 500ms sleep to let the server "breathe"
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // 2. UPDATE (PUT) - Using the ID from Step 1
         const putResponse = await request.put(`${baseUrl}/${newId}`, {
             data: {
