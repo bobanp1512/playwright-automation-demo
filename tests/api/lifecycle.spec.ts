@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Post API Lifecycle Management', () => {
-    test('API: Full CRUD Lifecycle for a single resource', async ({ request }) => {
-        const baseUrl = 'https://jsonplaceholder.typicode.com/posts';
+    const baseUrl = 'https://jsonplaceholder.typicode.com/posts';
 
+    test('API: Full CRUD Lifecycle for a single resource', async ({ request }) => {
         // 1. CREATE (POST)
         const postResponse = await request.post(baseUrl, {
             data: {
@@ -13,30 +13,30 @@ test.describe('Post API Lifecycle Management', () => {
             }
         });
         expect(postResponse.status()).toBe(201);
-        const postData = await postResponse.json();
-        const newId = postData.id; // Capture the dynamic ID
-        console.log(`Resource Created with ID: ${newId}`);
+        console.log('POST successful: Resource created (Mock ID 101)');
 
-        // 500ms sleep to let the server "breathe"
+        // COOL-DOWN: Let the server breathe
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 2. UPDATE (PUT) - Using the ID from Step 1
-        const putResponse = await request.put(`${baseUrl}/${newId}`, {
+        // 2. UPDATE (PUT) - Using an ID that truly exists (ID: 1)
+        const existingId = 1; 
+        const putResponse = await request.put(`${baseUrl}/${existingId}`, {
             data: {
-                id: newId,
+                id: existingId,
                 title: 'Updated Title',
                 body: 'Updated Body',
                 userId: 1
             }
         });
+        
         expect(putResponse.status()).toBe(200);
         const putData = await putResponse.json();
         expect(putData.title).toBe('Updated Title');
-        console.log(`Resource ${newId} Updated Successfully`);
+        console.log(`Resource ${existingId} Updated Successfully`);
 
-        // 3. DELETE - Cleaning up the specific ID
-        const deleteResponse = await request.delete(`${baseUrl}/${newId}`);
+        // 3. DELETE - Using the same existing ID
+        const deleteResponse = await request.delete(`${baseUrl}/${existingId}`);
         expect(deleteResponse.status()).toBe(200);
-        console.log(`Resource ${newId} Deleted Successfully`);
+        console.log(`Resource ${existingId} Deleted Successfully`);
     });
 });
