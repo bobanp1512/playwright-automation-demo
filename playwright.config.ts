@@ -26,6 +26,17 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  // use: {
+  //   /* Capture screenshot only on failure */
+  //   screenshot: 'only-on-failure',
+
+  //   /* Record video only on failure */
+  //   video: 'retain-on-failure',
+
+  //   /* Keep traces for failed tests to help with debugging */
+  //   trace: 'on-first-retry',
+  // },
+
   use: {
     /* Capture screenshot only on failure */
     screenshot: 'only-on-failure',
@@ -33,8 +44,8 @@ export default defineConfig({
     /* Record video only on failure */
     video: 'retain-on-failure',
 
-    /* Keep traces for failed tests to help with debugging */
-    trace: 'on-first-retry',
+    /* ALWAYS keep traces for failed tests */
+    trace: 'retain-on-failure', // <--- Change this from 'on-first-retry'
   },
 
   /* Configure projects for major browsers */
