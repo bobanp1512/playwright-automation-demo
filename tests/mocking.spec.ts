@@ -7,8 +7,14 @@ test.describe('Negative Testing: Server Failures & Interception', () => {
         // 1. Navigate to the page first to get past any initial redirects
         await page.goto('https://www.saucedemo.com/inventory.html');
 
+        /** * STRATEGY: DOM Polling
+         * We use a setInterval here to ensure the price remains tampered ($0.01) 
+         * even if the Service Worker or React re-renders the original price ($29.99).
+         */
+
         // 2. THE "RELENTLESS" INJECTOR
         // We run this AFTER navigation to ensure it's active on the final URL
+        
         await page.evaluate(() => {
             const tamper = () => {
                 const prices = document.querySelectorAll('[data-test="inventory-item-price"]');
