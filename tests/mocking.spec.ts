@@ -4,8 +4,36 @@ test.describe('Negative Testing: Server Failures & Interception', () => {
 
     test.use({ storageState: 'playwright/.auth/user.json' });
 
+    test('should display tampered price using foolproof injection', async ({ page }) => {
+        // 1. This script runs in the browser BEFORE the page even loads
+        await page.addInitScript(() => {
+            // We use a MutationObserver because SauceDemo loads data dynamically
+            const observer = new MutationObserver(() => {
+                // We use the exact selector and data-test attribute we saw in your logs
+                const priceElements = document.querySelectorAll('.inventory_item_price');
+                priceElements.forEach(el => {
+                    if (el.textContent && el.textContent.includes('$29.99')) {
+                        el.textContent = '$0.01';
+                    }
+                });
+            });
+
+            // Start observing the body for changes
+            observer.observe(document.documentElement, {
+                childList: true,
+                subtree: true
+            });
+        });
+
+        // 2. Navigate
+        await page.goto('https://www.saucedemo.com/inventory.html', { waitUntil: 'domcontentloaded' });
+
+        // 3. Assertion: Wait for our injected change to be visible
+        const firstPrice = page.locator('[data-test="inventory-item-price"]').first();
+        await expect(firstPrice).toHaveText('$0.01', { timeout: 15000 });
+    });
+
     test('should handle API failure on the inventory page', async ({ page }) => {
-        // Use a wildcard to ensure we catch it regardless of the base URL
         await page.route('**/inventory.html*', async route => {
             await route.fulfill({
                 status: 500,
@@ -18,22 +46,6 @@ test.describe('Negative Testing: Server Failures & Interception', () => {
         await expect(page.locator('.inventory_list')).not.toBeVisible();
     });
 
-
-
-    test('DEBUG: What is the actual HTML on the page?', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/inventory.html');
-    
-    // Let's grab the HTML of the first inventory item
-    const firstItemHtml = await page.locator('.inventory_item').first().innerHTML();
-    
-    // This will print to your GitHub Actions console
-    console.log('--- START DEBUG HTML ---');
-    console.log(firstItemHtml);
-    console.log('--- END DEBUG HTML ---');
-
-    // This test is meant to fail, we just want the log
-    expect(firstItemHtml).toContain('$0.01'); 
-});
 
     // test('should display tampered price using injection', async ({ page }) => {
     //     // 1. Inject a script that runs BEFORE the page scripts
