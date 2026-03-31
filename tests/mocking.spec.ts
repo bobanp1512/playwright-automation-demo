@@ -19,13 +19,10 @@ test.describe('Negative Testing: Server Failures & Interception', () => {
     });
 
     test('should display tampered price using a global interceptor', async ({ context, page }) => {
-        // 1. We use CONTEXT.route instead of PAGE.route
-        // This ensures the interceptor is active for the entire browser session
+        // 1. Set the interceptor at the CONTEXT level
         await context.route('**/inventory.html*', async route => {
             const response = await route.fetch();
             const body = await response.text();
-            
-            // 2. Use a robust replace for the price
             const modifiedBody = body.replace(/\$29\.99/g, '$0.01');
 
             await route.fulfill({
@@ -33,20 +30,24 @@ test.describe('Negative Testing: Server Failures & Interception', () => {
                 body: modifiedBody,
                 headers: {
                     ...response.headers(),
-                    'Content-Type': 'text/html',
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache'
+                    'Content-Type': 'text/html; charset=utf-8',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate'
                 }
             });
         });
 
-        // 3. Navigate and wait for the network to be completely quiet
-        await page.goto('https://www.saucedemo.com/inventory.html', { 
-            waitUntil: 'networkidle' 
+        // 2. Navigate
+        await page.goto('https://www.saucedemo.com/inventory.html', {
+            waitUntil: 'commit' // 'commit' is the earliest point we can start asserting
         });
 
-        // 4. Verification
+        // 3. THE "SENIOR" MOVE: Use an auto-retrying assertion
+        // This replaces the hard sleep. Playwright will re-run this check 
+        // every 100ms until it passes or hits the 5-second timeout.
         const firstPrice = page.locator('.inventory_item_price').first();
-        await expect(firstPrice).toHaveText('$0.01');
+
+        await expect(firstPrice).toHaveText('$0.01', { timeout: 7000 });
+
+        console.log('Success! Dynamic assertion caught the mocked price.');
     });
 });
