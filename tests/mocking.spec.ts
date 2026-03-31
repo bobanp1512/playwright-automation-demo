@@ -1,26 +1,32 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Negative Testing: Server Failures & Interception', () => {
-    // Apply storage state for the whole group
-    test.use({ storageState: 'playwright/.auth/user.json' });
+    // 1. DISABLE SERVICE WORKERS & CACHE
+    test.use({ 
+        storageState: 'playwright/.auth/user.json',
+        offline: false,
+        // This is the key: service workers can bypass standard routing
+        serviceWorkers: 'block' 
+    });
 
     test('should display tampered price using foolproof injection', async ({ context, page }) => {
-        // 1. SET THE TRAP AT THE CONTEXT LEVEL
-        // This survives redirects, reloads, and "soft" navigations
+        // 2. Clear cache for this context to force a fresh network fetch
+        await context.clearCookies(); 
+
         await context.route('**/*.{html,js,json}*', async (route) => {
             const response = await route.fetch();
             let body = await response.text();
 
-            if (body.includes('$29.99')) {
-                // Modify the source code directly before the browser even sees it
-                body = body.replace(/\$29\.99/g, '$0.01');
+            // Use a regex to replace the price globally in the source code
+            if (body.includes('29.99')) {
+                const modifiedBody = body.replace(/29\.99/g, '0.01');
                 await route.fulfill({
                     response,
-                    body,
+                    body: modifiedBody,
                     headers: {
                         ...response.headers(),
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache'
+                        'Expires': '0'
                     }
                 });
             } else {
@@ -28,26 +34,24 @@ test.describe('Negative Testing: Server Failures & Interception', () => {
             }
         });
 
-        // 2. Navigate to the base inventory page
-        await page.goto('https://www.saucedemo.com/inventory.html');
+        // 3. Force a hard reload navigation
+        await page.goto('https://www.saucedemo.com/inventory.html', { waitUntil: 'networkidle' });
 
-        // 3. Assertion
         const firstPrice = page.locator('[data-test="inventory-item-price"]').first();
-
-        // We use a slightly longer timeout because of the redirect logic on SauceDemo
+        
+        // Assert on the tampered value
         await expect(firstPrice).toHaveText('$0.01', { timeout: 15000 });
     });
 
     test('should handle API failure on the inventory page', async ({ page }) => {
-        await page.route('**/inventory.html*', async route => {
-            await route.fulfill({
-                status: 500,
-                contentType: 'text/plain',
-                body: 'Internal Server Error'
-            });
-        });
-
-        await page.goto('https://www.saucedemo.com/inventory.html');
+        // Simple mock for failure
+        await page.route('**/inventory.html*', route => route.abort('failed'));
+        
+        try {
+            await page.goto('https://www.saucedemo.com/inventory.html');
+        } catch (e) {
+            // Expected to fail navigation
+        }
         await expect(page.locator('.inventory_list')).not.toBeVisible();
     });
 });
