@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ main, master ]
     env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # <--- Add this line here
+  # FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # <--- Add this line here
 jobs:
   test:
     timeout-minutes: 60
