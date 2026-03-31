@@ -38,14 +38,43 @@ test.describe('Negative Testing: Server Failures', () => {
 
     test('should handle API failure on the inventory page', async ({ page }) => {
 
+        
+
         // 1. SET THE TRAP: Intercept the network BEFORE moving
+
+
         // This tells Playwright to "hijack" any call to the inventory logic
-        await page.route('**/inventory.html', async route => {
-            await route.fulfill({
-                status: 500,
-                contentType: 'text/plain',
-                body: 'Internal Server Error'
+        // await page.route('**/inventory.html', async route => {
+        //     await route.fulfill({
+        //         status: 500,
+        //         contentType: 'text/plain',
+        //         body: 'Internal Server Error'
+        //     });
+        // });
+
+        test('should display tampered price using a global interceptor', async ({ page }) => {
+            // 1. Intercept the main page request
+            await page.route('**/inventory.html', async route => {
+                const response = await route.fetch(); // Get the REAL page first
+                let body = await response.text();
+
+                // 2. Use a Regex or Replace to swap the price in the HTML code
+                // We find the first instance of $29.99 and change it to $0.01
+                body = body.replace('$29.99', '$0.01');
+
+                await route.fulfill({
+                    response,
+                    body
+                });
             });
+
+            // 3. Now navigate - the browser will receive your modified HTML
+            await page.goto('https://www.saucedemo.com/inventory.html');
+
+            const firstPrice = page.locator('.inventory_item_price').first();
+            await expect(firstPrice).toHaveText('$0.01');
+
+            console.log('Success! We tampered with the HTML stream.');
         });
 
         // 2. ACTION: Go to the page
