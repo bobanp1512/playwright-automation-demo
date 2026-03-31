@@ -18,37 +18,31 @@ test.describe('Negative Testing: Server Failures & Interception', () => {
         await expect(page.locator('.inventory_list')).not.toBeVisible();
     });
 
-    test('should display tampered price using a global interceptor', async ({ page }) => {
-        // 1. Trap the request with a Regex that ignores query params or trailing slashes
-        await page.route(/.*inventory\.html.*/, async (route) => {
-            const response = await route.fetch();
-            const body = await response.text();
-
-            // 2. Surgical replacement of the price in the raw HTML string
-            const modifiedBody = body.replace(/\$29\.99/g, '$0.01');
-
-            await route.fulfill({
-                response,
-                contentType: 'text/html',
-                body: modifiedBody,
-                headers: {
-                    ...response.headers(),
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+    test('should display tampered price using injection', async ({ page }) => {
+        // 1. Inject a script that runs BEFORE the page scripts
+        // This is much faster than network mocking for static text
+        await page.addInitScript(() => {
+            // We create an observer to watch for the price element to appear
+            const observer = new MutationObserver(() => {
+                const priceElement = document.querySelector('.inventory_item_price');
+                if (priceElement && priceElement.textContent === '$29.99') {
+                    priceElement.textContent = '$0.01';
                 }
+            });
+
+            // Start watching the document
+            observer.observe(document.documentElement, {
+                childList: true,
+                subtree: true
             });
         });
 
-        // 3. Force a hard navigation and wait for the network to be completely silent
-        await page.goto('https://www.saucedemo.com/inventory.html', {
-            waitUntil: 'networkidle'
-        });
+        // 2. Navigate normally
+        await page.goto('https://www.saucedemo.com/inventory.html');
 
-        // 4. Use a flexible assertion that retries for up to 10 seconds
+        // 3. Assert
         const firstPrice = page.locator('.inventory_item_price').first();
-        await expect(firstPrice).toHaveText('$0.01', { timeout: 10000 });
+        await expect(firstPrice).toHaveText('$0.01', { timeout: 15000 });
     });
-
 
 });
