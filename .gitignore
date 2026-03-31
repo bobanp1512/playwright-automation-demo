@@ -1,0 +1,18 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Security: Ignore environment variables
+.env
+
+# System: Ignore test results and local cache
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+hornet-qa-automation/
